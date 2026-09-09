@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1117">
+  <title>石油英语随身学</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-font="large">
+  <div id="app">
+    <!-- 顶部栏 -->
+    <div class="topbar">
+      <h1><span class="brand-dot">●</span> 石油英语随身学</h1>
+      <div class="net-status" id="netStatus">
+        <span class="dot"></span><span id="netText">检测中</span>
+      </div>
+    </div>
+
+    <!-- 首页 -->
+    <div class="page active" id="page-home">
+      <!-- 顶部欢迎区 -->
+      <div class="hero">
+        <div class="hero-text">
+          <div class="hero-greet" id="heroGreet">您好</div>
+          <div class="hero-title">今天学点英语吧</div>
+        </div>
+        <div class="streak-badge" id="streakBadge" title="连续学习天数">
+          <span class="flame">🔥</span>
+          <span class="streak-num" id="streakNum">0</span>
+          <span class="streak-lbl">天</span>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box"><div class="num" id="statLearned">0</div><div class="label">已学单词</div></div>
+        <div class="stat-box"><div class="num" id="statMastered">0</div><div class="label">已掌握</div></div>
+        <div class="stat-box"><div class="num" id="statSpeaking">0</div><div class="label">跟读次数</div></div>
+      </div>
+
+      <div class="card accent-card">
+        <h3><span class="ico">🎯</span> 今日任务</h3>
+        <div class="progress-bar"><div class="fill" id="dailyProgress" style="width:0%"></div></div>
+        <div style="font-size:var(--font-sm);color:var(--text-dim);margin-bottom:14px;" id="dailyText">今日学习 0 / 0 词</div>
+        <button class="btn btn-primary btn-block btn-lg" onclick="App.goReview()">开始复习 / 学习</button>
+      </div>
+
+      <div class="card listen-card">
+        <h3><span class="ico">🎧</span> 开车听读模式</h3>
+        <p style="font-size:var(--font-sm);color:var(--text-dim);margin-bottom:14px;">开车或休息时，戴上耳机自动播放单词和句子，跟着朗读，不用看屏幕。</p>
+        <button class="btn btn-accent btn-block btn-lg" onclick="App.goListening()">进入听读模式</button>
+      </div>
+
+      <div class="card">
+        <h3><span class="ico">💡</span> 每日一词</h3>
+        <div id="homeWordOfDay"><div class="empty"><div class="ico">🔍</div>加载中...</div></div>
+        <button class="btn btn-ghost btn-block" style="margin-top:12px;" onclick="App.loadHomeWordOfDay()">换一组</button>
+      </div>
+
+      <div class="card">
+        <h3><span class="ico">📰</span> 实时英语（联网）</h3>
+        <div id="homeQuote" style="font-size:var(--font-md);font-style:italic;color:var(--text-dim);">加载中...</div>
+        <button class="btn btn-ghost btn-block" style="margin-top:12px;" onclick="App.refreshQuote()">换一句</button>
+      </div>
+    </div>
+
+    <!-- 单词页 -->
+    <div class="page" id="page-words">
+      <div class="seg" id="wordFilter">
+        <button class="seg-btn active" data-tag="all" onclick="App.setWordFilter('all', this)">全部</button>
+        <button class="seg-btn" data-tag="oil" onclick="App.setWordFilter('oil', this)">石油专业</button>
+        <button class="seg-btn" data-tag="daily" onclick="App.setWordFilter('daily', this)">日常交流</button>
+        <button class="seg-btn" data-tag="driving" onclick="App.setWordFilter('driving', this)">开车场景</button>
+        <button class="seg-btn" data-tag="custom" onclick="App.setWordFilter('custom', this)">⭐联网</button>
+      </div>
+      <div id="wordList"></div>
+    </div>
+
+    <!-- 口语页 -->
+    <div class="page" id="page-speaking">
+      <div class="seg" id="sentenceFilter">
+        <button class="seg-btn active" data-cat="all" onclick="App.setSentenceFilter('all', this)">全部</button>
+        <button class="seg-btn" data-cat="oil" onclick="App.setSentenceFilter('oil', this)">石油场景</button>
+        <button class="seg-btn" data-cat="daily" onclick="App.setSentenceFilter('daily', this)">日常交流</button>
+        <button class="seg-btn" data-cat="smalltalk" onclick="App.setSentenceFilter('smalltalk', this)">寒暄社交</button>
+      </div>
+      <div id="sentenceList"></div>
+    </div>
+
+    <!-- 行业英语页 -->
+    <div class="page" id="page-industry">
+      <div class="card">
+        <h3><span class="ico">🛢️</span> 石油行业英语</h3>
+        <p style="font-size:var(--font-sm);color:var(--text-dim);margin-bottom:14px;">精选石油勘探、钻井、采油、炼化等专业词汇与场景，助力工作交流。</p>
+        <button class="btn btn-primary btn-block btn-lg" onclick="App.goIndustryStudy()">学习行业词汇</button>
+        <button class="btn btn-ghost btn-block" style="margin-top:10px;" onclick="App.goIndustrySpeaking()">练习行业口语</button>
+      </div>
+
+      <div class="card">
+        <h3><span class="ico">🌐</span> 行业动态（联网实时）</h3>
+        <div style="margin-bottom:10px;"><button class="btn btn-accent btn-block" onclick="App.loadOilNews()">刷新行业新闻</button></div>
+        <div id="oilNewsList"><div class="empty"><div class="ico">📡</div>点击上方按钮获取最新石油行业英文新闻</div></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="ico">💡</span> 每日一词</h3>
+        <div id="wordOfDay"><div class="empty"><div class="ico">🔍</div>加载中...</div></div>
+        <button class="btn btn-ghost btn-block" style="margin-top:10px;" onclick="App.loadWordOfDay()">换个词</button>
+      </div>
+    </div>
+
+    <!-- 我的页 -->
+    <div class="page" id="page-profile">
+      <div class="card">
+        <h3><span class="ico">📊</span> 学习统计</h3>
+        <div class="stats-grid" style="margin-bottom:0;">
+          <div class="stat-box"><div class="num" id="pLearned">0</div><div class="label">已学单词</div></div>
+          <div class="stat-box"><div class="num" id="pMastered">0</div><div class="label">已掌握</div></div>
+          <div class="stat-box"><div class="num" id="pSpeaking">0</div><div class="label">跟读次数</div></div>
+        </div>
+        <div class="progress-bar" style="margin-top:16px;"><div class="fill" id="masteryBar" style="width:0%"></div></div>
+        <div style="font-size:var(--font-sm);color:var(--text-dim);" id="masteryText">掌握进度</div>
+      </div>
+
+      <div class="card">
+        <h3><span class="ico">⚙️</span> 设置</h3>
+        <div class="setting-row">
+          <div><div class="label">字体大小</div><div class="desc">加大字号更清晰</div></div>
+          <div class="seg" style="margin:0;">
+            <button class="seg-btn" id="fontLargeBtn" onclick="App.setFont('large')">标准</button>
+            <button class="seg-btn" id="fontXlargeBtn" onclick="App.setFont('xlarge')">特大</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div><div class="label">朗读语速</div><div class="desc">慢速更适合跟读</div></div>
+          <div class="seg" style="margin:0;">
+            <button class="seg-btn" id="rateSlowBtn" onclick="App.setRate(0.7)">慢</button>
+            <button class="seg-btn" id="rateNormalBtn" onclick="App.setRate(0.85)">正常</button>
+            <button class="seg-btn" id="rateFastBtn" onclick="App.setRate(1.0)">快</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div><div class="label">每日单词目标</div><div class="desc" id="goalDesc">每天 10 个</div></div>
+          <div class="seg" style="margin:0;">
+            <button class="seg-btn" id="goal10Btn" onclick="App.setGoal(10)">10</button>
+            <button class="seg-btn" id="goal20Btn" onclick="App.setGoal(20)">20</button>
+            <button class="seg-btn" id="goal30Btn" onclick="App.setGoal(30)">30</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="ico">🔊</span> 声音诊断</h3>
+        <p style="font-size:var(--font-sm);color:var(--text-dim);margin-bottom:12px;">如果发音功能没声音，点击下方按钮测试：</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+          <button class="btn btn-primary" style="flex:1;min-width:120px;" onclick="App.testTTS()">🔊 测试 TTS 朗读</button>
+          <button class="btn btn-accent" style="flex:1;min-width:120px;" onclick="App.testAudio()">🎵 测试真人音频</button>
+        </div>
+        <div id="audioDiag" style="font-size:var(--font-sm);color:var(--text-dim);"></div>
+        <div class="banner warn" style="margin-top:10px;">
+          💡 安卓手机若 TTS 无声：<br>
+          1. 设置 → 系统 → 语言和输入法 → 文字转语音 (TTS) 输出 → 首选引擎选「Google TTS」<br>
+          2. 设置 → 应用 → Chrome/PWA → 权限 → 确保无障碍/通知权限开启<br>
+          3. 系统未装 TTS 引擎时，会自动用「真人音频」兜底
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="ico">ℹ️</span> 使用说明</h3>
+        <ul style="font-size:var(--font-sm);color:var(--text-dim);padding-left:20px;line-height:2;">
+          <li>手机浏览器打开后，可「添加到主屏幕」像 App 一样使用。</li>
+          <li>单词采用间隔重复记忆法，会按遗忘曲线提醒复习。</li>
+          <li>口语练习需授权麦克风，跟读后自动打分。</li>
+          <li>开车时用「听读模式」，戴耳机自动播放，无需看屏。</li>
+        </ul>
+      </div>
+
+      <button class="btn btn-ghost btn-block" onclick="App.resetAll()" style="color:var(--danger);">重置所有学习数据</button>
+    </div>
+  </div>
+
+  <!-- 底部导航 -->
+  <div class="tabbar">
+    <button class="tab active" data-page="home" onclick="App.switchTab('home', this)"><span class="ico">🏠</span>首页</button>
+    <button class="tab" data-page="words" onclick="App.switchTab('words', this)"><span class="ico">📖</span>单词</button>
+    <button class="tab" data-page="speaking" onclick="App.switchTab('speaking', this)"><span class="ico">🎙️</span>口语</button>
+    <button class="tab" data-page="industry" onclick="App.switchTab('industry', this)"><span class="ico">🛢️</span>行业</button>
+    <button class="tab" data-page="profile" onclick="App.switchTab('profile', this)"><span class="ico">👤</span>我的</button>
+  </div>
+
+  <!-- 学习/复习模态框 -->
+  <div id="studyModal" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:200;overflow-y:auto;">
+    <div style="max-width:560px;margin:0 auto;padding:16px;">
+      <div class="topbar" style="position:static;">
+        <h1 style="font-size:var(--font-md);">复习学习 <span id="studyCount"></span></h1>
+        <button class="btn btn-ghost" style="min-height:40px;padding:6px 14px;" onclick="App.closeStudy()">✕ 退出</button>
+      </div>
+      <div id="studyBody"></div>
+    </div>
+  </div>
+
+  <!-- 口语练习模态框 -->
+  <div id="speakModal" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:200;overflow-y:auto;">
+    <div style="max-width:560px;margin:0 auto;padding:16px;">
+      <div class="topbar" style="position:static;">
+        <h1 style="font-size:var(--font-md);">口语跟读</h1>
+        <button class="btn btn-ghost" style="min-height:40px;padding:6px 14px;" onclick="App.closeSpeak()">✕ 退出</button>
+      </div>
+      <div id="speakBody"></div>
+    </div>
+  </div>
+
+  <!-- 听读模式模态框 -->
+  <div id="listenModal" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:200;overflow-y:auto;">
+    <div style="max-width:560px;margin:0 auto;padding:16px;">
+      <div class="topbar" style="position:static;">
+        <h1 style="font-size:var(--font-md);">🎧 听读模式</h1>
+        <button class="btn btn-ghost" style="min-height:40px;padding:6px 14px;" onclick="App.closeListen()">✕ 退出</button>
+      </div>
+      <div id="listenBody"></div>
+    </div>
+  </div>
+
+  <script src="js/wordbank.js"></script>
+  <script src="js/sentences.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/speech.js"></script>
+  <script src="js/live.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
